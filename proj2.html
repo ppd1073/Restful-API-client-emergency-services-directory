@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Project 2</title>
+
+  <link href="assets\css\bootstrap.min.css" rel="stylesheet">
+  <link href="assets\sticky-footer-navbar.css" rel="stylesheet">
+  <link href="assets\custom.css" rel="stylesheet">
+  <link rel ="stylesheet" href="jquery-ui.css">
+  <link rel ="stylesheet" href="jquery-ui-1.css">
+  <link rel ="stylesheet" href="tablesorter\themes\green\style.css">
+  <script src="http://code.jquery.com/jquery-latest.js" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src ="tablesorter\jquery-latest.js"></script>
+  <script src ="tablesorter\jquery.tablesorter.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDh2OLId9bTFREOxvngUJTGRPMfPn3Cwus" async defer>
+  </script>
+  <script src="assets\js\bootstrap.min.js"></script>
+  <script src="assets\js\moment.js"></script>
+  <script src="assets\js\underscore-min.js"></script>
+  <script src="plugin.js"></script>
+  <script src="jquery.backstretch.min.js"></script>
+  <link rel ="stylesheet" href="style.css">
+  <script type="text/javascript">
+    var url = "https://people.rit.edu/dmgics/754/23/proxy.php";
+
+    $(document).ready(function(){
+
+      $("h2").greenify();
+      $("#f").textHover();
+      $("#s").textHover();
+
+// To display time with bootstrap
+  $("footer").html(moment().format('MMMM Do YYYY, h:mm:ss a'));
+
+// To increase the size of H2 on click.
+  $("#btnSearch").click(function(){
+      $("#tableOutput").animate({height: "1000px"});
+  });
+  $("#btnSearch").click(function(){
+     $("h2").animate({fontSize: "3em"});
+  });
+
+// Background Image Plugin
+  $.backstretch("emerg.jpg");
+
+    });
+
+
+// Form creation dynamically
+    function init(){
+
+    var form = $("#search");
+    var $labeltype = $("<label>").text('Organization Type:');
+    var $input = $('<select>').attr({class:"custom-select",id: 'from', name: 'type'});
+    $input.appendTo($labeltype);
+    $("#f").append($labeltype);
+
+    var $labelorg = $("<label>").text('Organizations:');
+    var $inputorg = $('<input type="text">').attr({class:"form-control", placeholder:"Organization Name",id: 'org',name:'Name'})
+    $inputorg.appendTo($labelorg);
+    $("#o").append($labelorg);
+
+    var $labelst = $("<label>").text('States:');
+    var $inputst = $('<select type="text">').attr({class:"custom-select",id: 'st',name:'State'})
+    $inputst.appendTo($labelst);
+    $("#s").append($labelst);
+
+    var $labelct = $("<label>").text('Cities:');
+    // $('$labelct').css({color:'#fcc'});
+    var $inputct = $('<select type="text">').attr({class:"custom-select",id: 'ct',name:'city'})
+    $inputct.appendTo($labelct);
+    $("#s").append($labelct);
+
+    var $labelco = $("<label>").text('County:');
+    var $inputco = $('<input type="text">').attr({class:"form-control", placeholder:"County",id: 'co',name:'county'})
+    $inputco.appendTo($labelco);
+    $("#c").append($labelco);
+
+    var $labelzp = $("<label>").text('Zipcode:');
+    var $inputzp = $('<input type="text">').attr({class:"form-control", placeholder:"Zipcode",id: 'zp',name:'zip'})
+    $inputzp.appendTo($labelzp);
+    $("#z").append($labelzp);
+
+
+    $("#st").change(function(){
+      var stvalue = $( "#st option:selected" ).text();
+      console.log(stvalue);
+      getCities(stvalue);
+        });
+
+//console.log(document.body);
+    }
+
+  // Get Organization types
+    function getOrgTypes(){
+      $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/OrgTypes"},
+        //data: {path: "/OrgTypes"},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+          var opts = "";
+          if($(data).find("error").length !==0){
+              //1
+          }
+          else{
+            opts += "<option value=''>All organisations types</option>";
+            $("row",data).each(function(){
+              opts += "<option value='" +$("type",this).text() +  "'>" + $("type",this).text()+"</option>";
+            });
+            $('#from').html(opts);
+        }
+      }
+    });
+  }
+
+
+    function getOrgs(){
+      $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/Organizations"},
+        //data: {path: "/OrgTypes"},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+          var optorg = "";
+          if($(data).find("error").length !==0){
+              //1
+          }
+          else{
+            optorg += "<input value=''>All organisations types</option>";
+            $("row",data).each(function(){
+              optorg += "<input value='"+$("Name",this).text() + "'>" + $("Name",this).text()+"</input>";
+                //console.log("helo"+optorg);
+            });
+            $('#org').html(optorg);
+          //  console.log("helo");
+        }
+      }
+    });
+  }
+
+// To get states.
+
+    function getStates(){
+        $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/States"},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+        var optst = "";
+        if($(data).find("error").length !==0){
+            console.log("inside if");
+          }
+        else{
+            optst += "<option value=''>States</option>";
+            console.log("in else"+data);
+            $("row",data).each(function(){
+            optst += "<option value='" +$("State",this).text() +"'>" + $("State",this).text()+"</option>";
+            });
+            console.log("out else"+data);
+            $('#st').html(optst);
+              }
+            }
+          });
+        }
+
+
+    function getCities(stvalue){
+        $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/Cities?state="+stvalue},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+        console.log("inside cities");
+        var optct = "";
+        if($(data).find("error").length !==0){
+          }
+        else{
+            optct += "<option value=''>Cities</option>";
+            $("row",data).each(function(){
+                optct += "<option value='" +$("city",this).text()+"'>" + $("city",this).text()+"</option>";
+             });
+             $('#ct').html(optct);
+                console.log(optct);
+              }
+            }
+          });
+        }
+//To get general infromation
+
+     function getGeneralInfo(orgId){
+        $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/"+orgId +"/General"},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+        var op = "";
+        console.log(data);
+        if($(data).find("error").length !==0){
+            }
+        else
+            {
+          op += `<table id = 'tab-table' class ="tablesorter">
+                  <thead>
+                  <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>website</th>
+                  <th>Description</th>
+                  <th>Nummembers</th>
+                  <th>Numcalls</th>
+                  <th>Servicecalls</th>
+                  </tr>
+                  </thead>`;
+           op += "<tr>"+
+                 "<td>"+$(data).find("name").text()+"</td>"+
+                 "<td>"+$(data).find("email").text()+"</td>"+
+                 "<td>"+$(data).find("description").text()+"</td>"+
+                 "<td>"+$(data).find("nummembers").text()+"</td>"+
+                 "<td>"+$(data).find("numcalls").text()+"</td>"+
+                 "<td>"+$(data).find("servicecalls").text()+"</td>"+
+                 "</tr>";
+
+            console.log("table");
+            $("#General").html(op);
+
+               }
+
+             }
+
+         });
+      }
+
+
+    function getTreatmentsInfo(orgId){
+        $.ajax({
+        type: "GET", //HTTP method, could also be "POST"
+        async: true, //request should be non blocking?
+        cache: false,
+        url:url,
+        data: {path : "/"+orgId +"/Treatments"},
+        dataType: "xml", //content type of response
+        success: function(data,status){
+        var op = "";
+        console.log(data);
+                     //if($(data).find("error").length !==0)
+          if($(data).find("treatment").length ===0){
+                     }
+          else
+              {
+                      //console.log($(data).find("count"));
+           op += `<table id = 'tab-table' class ="tablesorter">
+                  <thead>
+                  <tr>
+                  <th>TypeID</th>
+                  <th>Type</th>
+                  <th>Abbreviation</th>
+                  </tr>
+                  </thead>`;
+           $("treatment",data).each(function(){
+                op += "<tr>"+
+                      "<td>"+$(this).find("typeId").text()+"</td>"+
+                      "<td>"+$(this).find("type").text()+"</td>"+
+                      "<td>"+$(this).find("abbreviation").text()+"</td>"+
+                      "</tr>";
+                      console.log("table");
+                  });
+                op += "</table>";
+                $("#Treatments").html(op);
+
+                     }
+
+                   }
+
+               });
+            }
+
+        function getTrainingInfo(orgId){
+              $.ajax({
+              type: "GET", //HTTP method, could also be "POST"
+              async: true, //request should be non blocking?
+              cache: false,
+              url:url,
+              data: {path : "/"+orgId +"/Training"},
+              dataType: "xml", //content type of response
+              success: function(data,status){
+              var opt = "";
+              console.log(data);
+              //if($(data).find("error").length !==0)
+              if($(data).find("training").length ===0){
+              }
+              else
+              {
+                //console.log($(data).find("count"));
+              opt += `<table id = 'tab-table' class ="tablesorter">
+                 <thead>
+                 <tr>
+                 <th>TypeID</th>
+                 <th>Type</th>
+                 <th>Abbreviation</th>
+                 </tr>
+                 </thead>`;
+                $("training",data).each(function(){
+                opt += "<tr>"+
+                "<td>"+$(this).find("typeId").text()+"</td>"+
+                "<td>"+$(this).find("type").text()+"</td>"+
+                "<td>"+$(this).find("abbreviation").text()+"</td>"+
+                " </tr>";
+                console.log("table");
+                });
+
+                opt += "</table>";
+                $("#Training").html(opt);
+
+                      }
+
+                  }
+
+              });
+            }
+      function getEquipmentInfo(orgId){
+           $.ajax({
+           type: "GET", //HTTP method, could also be "POST"
+           async: true, //request should be non blocking?
+           cache: false,
+           url:url,
+           data: {path : "/"+orgId +"/Equipment"},
+           dataType: "xml", //content type of response
+           success: function(data,status){
+           var opt = "";
+           console.log(data);
+                  //if($(data).find("error").length !==0)
+             if($(data).find("equipment").length ===0){
+                }
+             else
+                {
+                  //console.log($(data).find("count"));
+                  opt += `<table id = 'tab-table' class ="tablesorter">
+                     <thead>
+                     <tr>
+                     <th>TypeID</th>
+                     <th>Type</th>
+                     <th>Quantity</th>
+                     <th>Description</th>
+                     </tr>
+                     </thead>`;
+                    $("equipment",data).each(function(){
+                    opt += "<tr>"+
+                    "<td>"+$(this).find("typeId").text()+"</td>"+
+                    "<td>"+$(this).find("type").text()+"</td>"+
+                    "<td>"+$(this).find("quantity").text()+"</td>"+
+                    "<td>"+$(this).find("description").text()+"</td>"+
+                    " </tr>";
+                    console.log("table");
+                    });
+
+                    opt += "</table>";
+                    $("#Equipment").html(opt);
+
+                          }
+
+                      }
+
+                  });
+                }
+    function getAssetsInfo(orgId){
+            $.ajax({
+            type: "GET", //HTTP method, could also be "POST"
+            async: true, //request should be non blocking?
+            cache: false,
+            url:url,
+            data: {path : "/"+orgId +"/Facilities"},
+            dataType: "xml", //content type of response
+            success: function(data,status){
+            var opt = "";
+            console.log(data);
+                            //if($(data).find("error").length !==0)
+            if($(data).find("facility").length ===0){
+              }
+            else
+              {
+                opt += `<table id = 'tab-table' class ="tablesorter">
+                        <thead>
+                        <tr>
+                        <th>TypeID</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Description</th>
+                        </tr>
+                        </thead>`;
+                $("facility",data).each(function(){
+                        opt += "<tr>"+
+                        "<td>"+$(this).find("typeId").text()+"</td>"+
+                        "<td>"+$(this).find("type").text()+"</td>"+
+                        "<td>"+$(this).find("quantity").text()+"</td>"+
+                        "<td>"+$(this).find("description").text()+"</td>"+
+                        " </tr>";
+                        console.log("table");
+                  });
+
+                 opt += "</table>";
+                 $("#Facilities").html(opt);
+
+                      }
+
+                                }
+
+                            });
+                          }
+
+          // To get people information
+
+      function getPeopleInfo(orgId){
+                  $.ajax({
+                  type: "GET", //HTTP method, could also be "POST"
+                  async: true, //request should be non blocking?
+                  cache: false,
+                  url:url,
+                  data: {path : "/"+orgId +"/People"},
+                  dataType: "xml", //content type of response
+                  success: function(data,status){
+                  var optp = "";
+                  var opd = "";
+                  console.log(data);
+                  var $labelp = $("<label>").text('People:');
+                  var $inputp = $('<select type="text">').attr({id: 'p',name:'address', style: 'width:150px'})
+                  $inputp.appendTo($labelp);
+                  $("#People").append($labelp);
+                  if($(data).find("site").length ===0){
+                                    }
+                  else
+                      {
+                      optp += "<option value=''>Address</option>";
+                      $("site",data).each(function(){
+                      optp += "<option value='" +$(this).attr("address")+"'>" + $(this).attr("address")+"</option>";
+                      });
+                     $('#p').html(optp);
+                             }
+                     $("#p").change(function(){
+                     console.log("onchange");
+                     var strUser = $("#p option:selected").text();
+                     console.log(strUser);
+                     //$("site",data).each(function(){
+                       console.log($("site",data).find('personCount').val()==0);
+
+                     if($("site").find('address').text() === 0){
+                                       }
+                      else {
+                        opd += `<table id = 'tab-table' class ="tablesorter">
+                          <thead>
+                          <tr>
+                          <th>PersonID</th>
+                          <th>Honorific</th>
+                          <th>First Name</th>
+                          <th>Middle Name</th>
+                          <th>Last Name</th>
+                          <th>Suffix</th>
+                          <th>Role</th>
+                          </tr>
+                          </thead>`;
+                      $("person",data).each(function(){
+                            opd += "<tr>"+
+                            "<td>"+$(this).find("personId").text()+"</td>"+
+                            "<td>"+$(this).find("honorific").text()+"</td>"+
+                            "<td>"+$(this).find("fName").text()+"</td>"+
+                            "<td>"+$(this).find("mName").text()+"</td>"+
+                            "<td>"+$(this).find("lName").text()+"</td>"+
+                            "<td>"+$(this).find("suffix").text()+"</td>"+
+                            "<td>"+$(this).find("role").text()+"</td>"+
+                            " </tr>";
+                            console.log("table");
+                            });
+                      $("#People").html(opd);
+                      }
+                      });
+                  }
+                    });
+                  }
+// Use of google api and display locations information
+
+  function getLocationInfo(orgId){
+          $.ajax({
+            type: "GET", //HTTP method, could also be "POST"
+            async: true, //request should be non blocking?
+            cache: false,
+            url:url,
+            data: {path : "/"+orgId +"/Locations"},
+            dataType: "xml", //content type of response
+            success: function(data,status){
+            var optp = "";
+            var opd = "";
+            console.log(data);
+            var $labelv = $("<label>").text('Location Information:');
+            var $inputv = $('<select type="text">').attr({id: 'l',name:'location', style: 'width:150px'})
+            $inputv.appendTo($labelv);
+            $("#Locations").append($labelv);
+            if($(data).find("location").length ===0){
+                      }
+            else
+                {
+            optp += "<option value=''>Location</option>";
+            $("location",data).each(function(){
+            optp += "<option value='" +$("type",this).text()+"'>" + $("type",this).text()+"</option>";
+                                  });
+              console.log(optp);
+              $('#l').html(optp);
+                                }
+            $("#l").change(function(){
+            console.log("onchange");
+            var strUser = $("#l option:selected").text();
+            console.log(strUser);
+            if($(data).find("location").length ===0){
+                            }
+            else{
+                opd += `<table id = 'tab-table' class ="tablesorter">
+                        <thead>
+                        <tr>
+                        <th>Type</th>
+                        <th>Address1</th>
+                        <th>Address2</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip</th>
+                        <th>Phone</th>
+                        <th>Ttyphone</th>
+                        <th>Fax</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>County Id</th>
+                        <th>County Name</th>
+                        <th>Site Id</th>
+                        </tr>
+                        </thead>`;
+                $("location",data).each(function(){
+                         opd += "<tr>"+
+                                "<td>"+$(this).find("type").text()+"</td>"+
+                                "<td>"+$(this).find("address").text()+"</td>"+
+                                "<td>"+$(this).find("address2").text()+"</td>"+
+                                "<td>"+$(this).find("city").text()+"</td>"+
+                                "<td>"+$(this).find("state").text()+"</td>"+
+                                "<td>"+$(this).find("zip").text()+"</td>"+
+                                "<td>"+$(this).find("phone").text()+"</td>"+
+                                "<td>"+$(this).find("ttyphone").text()+"</td>"+
+                                "<td>"+$(this).find("fax").text()+"</td>"+
+                                "<td>"+$(this).find("latitude").text()+"</td>"+
+                                "<td>"+$(this).find("longitude").text()+"</td>"+
+                                "<td>"+$(this).find("countyId").text()+"</td>"+
+                                "<td>"+$(this).find("countyName").text()+"</td>"+
+                                "<td>"+$(this).find("siteId").text()+"</td>"+
+                                "</tr>"+
+                                "</table>";
+                                console.log("table");
+                                        });
+
+                               var x = '<div id="map" style = "height:350px; width:250px; ">';
+                               $("#Locations").html(opd + x);
+                               console.log("hello");
+                               console.log(document.body);
+
+                               $('location', data).each(function () {
+                                 var lati = parseInt($(this).find('latitude').text());
+                                 var longi =parseInt($(this).find('longitude').text());
+
+                                 console.log(lati);
+                                 console.log(longi);
+                                  new google.maps.Map(document.getElementById('map'), {
+
+                                     center: {lat:lati , lng:longi },
+                                     zoom: 8
+
+                                  });
+
+
+                               });
+
+                                }
+                                  });
+                        }
+                            });
+                      }
+
+//Display physicians infromation
+
+          function getPhysiciansInfo(orgId,orgvalue){
+                  $.ajax({
+                  type: "GET", //HTTP method, could also be "POST"
+                  async: true, //request should be non blocking?
+                  cache: false,
+                  url:url,
+                  data: {path : "/"+orgId +"/Physicians"},
+                  dataType: "xml", //content type of response
+                  success: function(data,status){
+                  var opt = "";
+                  console.log(data);
+                  //if($(data).find("error").length !==0)
+                  if($(data).find("physician").length ===0){
+                      }
+                  else
+                    {
+                    //console.log($(data).find("count"));
+                    opt += `<table id = 'tab-table' class ="tablesorter">
+                      <thead>
+                      <tr>
+                      <th>PersonID</th>
+                      <th>First Name</th>
+                      <th>Middle Name</th>
+                      <th>Last Name</th>
+                      <th>Suffix</th>
+                      <th>Phone</th>
+                      <th>License</th>
+                      </tr>
+                      </thead>`;
+                    $("physician",data).each(function(){
+                      opt += "<tr>"+
+                      "<td>"+$(this).find("personId").text()+"</td>"+
+                      "<td>"+$(this).find("fName").text()+"</td>"+
+                      //"<td>"+$(this).find("mName").text()+"</td>"+
+                      "<td>"+$(this).find("mName").text()+"</td>"+
+                      "<td>"+$(this).find("lName").text()+"</td>"+
+                      "<td>"+$(this).find("suffix").text()+"</td>"+
+                      "<td>"+$(this).find("phone").text()+"</td>"+
+                      "<td>"+$(this).find("license").text()+"</td>"+
+                      " </tr>";
+                      console.log("table");
+                      });
+
+                      opt += "</table>";
+                      $("#Physicians").html(opt);
+
+                       }
+
+                          }
+
+                          });
+                      }
+
+//To get Tabs and use of tabs plugin
+
+        function getTabs(orgId){
+          console.log("the id is"+orgId);
+          $.ajax({
+            type: "GET", //HTTP method, could also be "POST"
+            async: true, //request should be non blocking?
+            cache: false,
+            url:url,
+            data: {path : "/Application/Tabs?orgId="+orgId},
+            dataType: "xml",
+            success: function(data,status){
+              var x = "";
+              var y = "";
+              console.log("data"+ data);
+              var optct = "";
+              if($(data).find("error").length !==0){
+              }
+              else{
+                var x = '<div id="tabs">';
+                  x += '<ul>';
+        $("Tab", data).each(function () {
+            x += "<li>" + $(this).text() + "</li>";
+            y  += '<div id="' + $(this).text() + '"></div>';
+        });
+        $('#dialog-modal').html(x + '</ul>' + y);
+        $( "#tabs" ).tabs();
+        $('#dialog-modal').dialog({ //effect for closing the dialog modal box.
+            minHeight: 600,
+            minWidth: 1000,
+            show: {
+
+              duration: 1000
+            },
+            buttons: {
+              'Close': function () {
+                $(this).dialog('close');
+              }
+            }
+          });
+          $("li").click(function(){
+            if($(this).text() === "General"){
+
+                return getGeneralInfo(orgId);
+               }
+           else if($(this).text() === "Locations"){
+                   return getLocationInfo(orgId);
+                  }
+          else if($(this).text() === "Treatments"){
+                   console.log("I am here");
+                   return getTreatmentsInfo(orgId);
+                  }
+          else if($(this).text() === "Training"){
+                  return getTrainingInfo(orgId);
+                  }
+          else if($(this).text() === "Facilities"){
+                  return getAssetsInfo(orgId);
+                    }
+          else if($(this).text() === "Equipment"){
+                return getEquipmentInfo(orgId);
+                    }
+          else if($(this).text() === "People"){
+                return getPeopleInfo(orgId);
+                    }
+          else if($(this).text() === "Physicians"){
+                return getPhysiciansInfo(orgId);
+                        }
+          });
+
+              }
+            }
+          });
+        }
+
+        // To display output table
+          function showResults(){
+          console.log(document.body);
+          console.log($("#search").serialize());
+          $.ajax({
+            url: url,
+            data: {path: "/Organizations?"+ $("#search").serialize()},
+            success: function(data){
+              console.log(data);
+              var output ="";
+              $("#tableOutput").html("");
+              if($(data).find("row").length ===0){
+                  output += "No matches found";
+              }
+              else{
+                output += `<table id = 'result-table' class ="tablesorter">
+                              <thead>
+                               <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>City</th>
+                                <th>State</th>
+                                <th>County</th>
+                                <th>Zip</th>
+                                 </tr>
+                                </thead>`;
+
+                $("row",data).each(function(){
+
+                   output +="<tr>"+
+                             "<td>"+ $(this).find("type").text() + "</td>" +
+                             "<td>"+ "<a href='javascript:getTabs("+$(this).find("OrganizationID").text()+")'>"+ $("Name",this).text()+ "</a>"+ "</td>"
+                             + "<td>"+ $("Email",this).text() +"</td>"
+                             + "<td>"+ $("city",this).text() + "</td>"
+                             + "<td>"+ $("State",this).text() + "</td>"
+                             + "<td>"+ $("CountyName",this).text() + "</td>"
+                             + "<td>"+ $("zip",this).text() + "</td>"
+                             + "</tr>";
+                             console.log("table");
+                });
+                output += "</table>";
+                $("#tableOutput").html(output);
+
+
+              }
+             }
+          });
+        }
+  getOrgTypes();
+  getStates();
+  getOrgs();
+
+  </script>
+</head>
+<body onload = "init()">
+<h2>Emergency Services Directory</h2>
+<form id = "search">
+  <div id = "f"></div>
+  <div id = "o"></div>
+  <div id = "s"></div>
+  <div id = "c"></div>
+  <div id = "z"></div>
+  <div id = "b"></div>
+  <input value="Show Results" id="btnSearch" onclick="showResults()" class="btn btn-light" type="button">
+  <input value="Reset Form" id="btnReset" onclick="" class="btn btn-light" type="button">
+   <div id="dialog-modal" title="Information">
+      <div id='getData'></div>
+  </div>
+  <div id="tableOutput"></div>
+  <div id="Output"></div>
+  <div id="OutputNew"></div>
+
+
+    <footer class="footer">
+      <div class="container">
+      <span class="text-muted">Prajakta Deshpande</span>
+      </div>
+    </footer>
+    </form>
+
+</body>
+</html>
